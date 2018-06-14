@@ -40,14 +40,14 @@ if __name__ == "__main__":
 
     # 函数调用：逐次调用 -> 异步批量调用
     # for n in range(10):
-    #     time.sleep(1)
+    #     # time.sleep(1)
     #     print("call -> method_list_invoke(%d)" % n)
     #     method_list_invoke(n)
 
     # 对象方法调用：逐次调用 -> 异步批量调用
-    aaa = AClass()
-    for n in range(10):
-        print("call -> class_method_list_invoke(%d)" % n)
-        aaa.class_method_list_invoke(n)
+    # aaa = AClass()
+    # for n in range(10):
+    #     print("call -> class_method_list_invoke(%d)" % n)
+    #     aaa.class_method_list_invoke(n)
 
     time.sleep(6)
