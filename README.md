@@ -4,6 +4,9 @@
 通过装饰器方式实现生产者消费者模式。
 可以作用于函数、类的方法上，使其变为异步调用，同时，转变为逐次调用，批量执行。方便将零碎的调用转变为批量形势进行统一执行。
 
+[Github 地址：ProducerConsumerPattern](https://github.com/mmmaaaggg/ProducerConsumerPattern)
+
+
 ### 示例代码
 
 函数调用：逐次调用 -> 异步逐次调用
@@ -25,7 +28,7 @@ for n in range(10):
 time.sleep(6)
 ```
 
-函数调用：逐次调用 -> 异步逐次调用
+函数调用：逐次调用 -> 异步批量调用
 ```python
 from prodconpattern import ProducerConsumer
 
@@ -68,4 +71,4 @@ time.sleep(6)
 ```
 
 更多例子参考
-example.py 文件
+[example.py 文件](https://github.com/mmmaaaggg/ProducerConsumerPattern/blob/master/example.py)
