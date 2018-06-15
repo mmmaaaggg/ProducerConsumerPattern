@@ -6,6 +6,8 @@
 
 [Github 地址：ProducerConsumerPattern](https://github.com/mmmaaaggg/ProducerConsumerPattern)
 
+### 安装
+> pip install prodconpattern
 
 ### 示例代码
 
