@@ -9,7 +9,7 @@
 """
 
 from queue import Queue, Empty
-from threading import Thread
+from threading import Thread, Lock
 from datetime import datetime
 
 
@@ -21,6 +21,7 @@ class ProducerConsumer(Thread):
     def __init__(self, threshold=100, interval=3, pass_arg_list=False, is_class_method=False, queue_timeout=5):
         super().__init__(daemon=True)
         self.queue = Queue()
+        self.lock = Lock()
         self.threshold = threshold
         self.interval = interval
         self.pass_arg_list = pass_arg_list
@@ -35,9 +36,10 @@ class ProducerConsumer(Thread):
 
         def _call(*args, **kwargs):
             # print('call ', func.__name__, *args, **kwargs)
-            if not self.is_alive():
-                # print('start worker thread')
-                self.start()
+            with self.lock:
+                if not self.is_alive():
+                    # print('start worker thread')
+                    self.start()
             self.queue.put_nowait((args, kwargs))
             # self._func(*args, **kwargs)
 
@@ -82,28 +84,49 @@ class ProducerConsumer(Thread):
 
                     args_len += 1
 
-                except Empty:
-                    pass
-
-                # args_len = 0 if len(args_list) <= 0 else len(args_list[0])
-                # print('args_list:', args_list, "threshold", self.threshold, args_len >= self.threshold)
-                if args_len > 0 and (args_len >= self.threshold or (
-                        datetime.now() - datetime_last_invoke).seconds >= self.interval):
-                    # print('start real call -> self_obj_key, args_list, kwargs_list_dic:',
-                    #       self_obj_key, args_list, kwargs_list_dic)
-                    if self.is_class_method:
-                        func(self_obj_key, *args_list, **kwargs_list_dic)
+                    # print('args_list:', args_list, "threshold", self.threshold, args_len >= self.threshold)
+                    if args_len > 0 and (args_len >= self.threshold or (
+                            datetime.now() - datetime_last_invoke).seconds >= self.interval):
+                        # print('start real call -> self_obj_key, args_list, kwargs_list_dic:',
+                        #       self_obj_key, args_list, kwargs_list_dic)
+                        if self.is_class_method:
+                            func(self_obj_key, *args_list, **kwargs_list_dic)
+                        else:
+                            func(*args_list, **kwargs_list_dic)
+                        args_list.clear()
+                        for _, v in kwargs_list_dic.items():
+                            v.clear()
+                        args_len = 0
+                        # 更新 args_len, 最近执行时间
+                        class_method_args_dic[self_obj_key] = [args_list, kwargs_list_dic, args_len, datetime.now()]
                     else:
-                        func(*args_list, **kwargs_list_dic)
-                    args_list.clear()
-                    for _, v in kwargs_list_dic.items():
-                        v.clear()
-                    args_len = 0
-                    # 更新 args_len
-                    class_method_args_dic[self_obj_key] = [args_list, kwargs_list_dic, args_len, datetime.now()]
-                else:
-                    # 更新 args_len
-                    class_method_args_dic[self_obj_key][2] = args_len
+                        # 更新 args_len
+                        class_method_args_dic[self_obj_key][2] = args_len
+                except Empty:
+                    for num, (k, v) in enumerate(kwargs_list_dic.items()):
+                        print('timeout check : %d) [%s] %s ' % (num, k, v))
+
+                    for num, self_obj_key in enumerate(list(class_method_args_dic.keys())):
+                        args_list, kwargs_list_dic, args_len, datetime_last_invoke = class_method_args_dic[self_obj_key]
+                        # print('args_list:', args_list, "threshold", self.threshold, args_len >= self.threshold)
+                        if args_len > 0 and (args_len >= self.threshold or (
+                                datetime.now() - datetime_last_invoke).seconds >= self.interval):
+                            # print('start real call -> self_obj_key, args_list, kwargs_list_dic:',
+                            #       self_obj_key, args_list, kwargs_list_dic)
+                            if self.is_class_method:
+                                func(self_obj_key, *args_list, **kwargs_list_dic)
+                            else:
+                                func(*args_list, **kwargs_list_dic)
+                            args_list.clear()
+                            for _, v in kwargs_list_dic.items():
+                                v.clear()
+                            args_len = 0
+                            # 更新 args_len, 最近执行时间
+                            class_method_args_dic[self_obj_key] = [args_list, kwargs_list_dic, args_len, datetime.now()]
+                        else:
+                            # 更新 args_len
+                            class_method_args_dic[self_obj_key][2] = args_len
+
         else:
             args_list = []
             kwargs_list = []
