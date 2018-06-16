@@ -14,7 +14,7 @@ with open("README.md", "r", encoding='utf-8') as rm:
     long_description = rm.read()
 
 setup(name='prodconpattern',
-      version='0.1.1',
+      version='0.2.0',
       description='通过装饰器方式实现生产者消费者模式。可以作用于函数、类的方法上，使其变为异步调用，同时，转变为逐次调用，批量执行。方便将零碎的调用转变为批量形势进行统一执行。',
       long_description=long_description,
       long_description_content_type="text/markdown",
