@@ -10,6 +10,7 @@
 from prodconpattern import ProducerConsumer
 import time
 
+
 class AClass:
 
     def __init__(self, name):
